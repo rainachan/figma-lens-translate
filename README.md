@@ -22,7 +22,7 @@ You'll get an **API URL** and an **API key** from your team. Lens has no service
 3. Paste the **API base URL**, then the **API key**.
 4. Click **Test**. When you see `Connected · … · <English sentence>`, click **Save**.
 
-Your key is stored only in Figma's plugin storage on this computer. It's never written into design files. **Haiku 5.5** is the default model. **Sonnet 4.6** handles nuanced wording better, but it's slower and costs more.
+Your key is stored only in Figma's plugin storage on this computer. It's never written into design files. **Haiku 5.5** is the default model. **Sonnet 5.5** handles nuanced wording better, but it's slower and costs more.
 
 ## Everyday use
 
@@ -67,7 +67,7 @@ API 地址和 API key 由团队提供，插件本身不带任何服务地址或 
 3. 先填 **API base URL**，再粘贴 **API key**。
 4. 点 **Test**，看到 `Connected · … · 英文译文` 后点 **Save**。
 
-Key 只保存在这台电脑的 Figma 插件存储里，不会写进设计文件。默认模型是 **Haiku 5.5**；**Sonnet 4.6** 措辞更好，但更慢、费用更高。
+Key 只保存在这台电脑的 Figma 插件存储里，不会写进设计文件。默认模型是 **Haiku 5.5**；**Sonnet 5.5** 措辞更好，但更慢、费用更高。
 
 ### 日常使用
 

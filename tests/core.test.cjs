@@ -40,6 +40,7 @@ test('all preset models use no thinking', () => {
     const profile = C.chooseModel(provider, { ...p, key: 'test-only' }, choice.id);
     const body = JSON.parse(C.request(profile, items, 'English', {}, '').options.body);
     if (profile.protocol === 'responses') assert.deepEqual(body.reasoning, { effort: 'none' });
+    else if (choice.id === 'claude-sonnet-5-5') assert.deepEqual(body.thinking, { type: 'between_tools' });
     else assert.deepEqual(body.thinking, { type: 'disabled' });
   }
   const unknown = { ...p, model: 'custom-model', protocol: 'chat' };
@@ -177,4 +178,15 @@ test('a saved OpenCode Go selection falls back to team API and drops the Go prof
 test('the team preset ships without a service URL or key', () => {
   assert.equal(C.defaults().profiles.team.endpoint, ''); assert.equal(C.defaults().profiles.team.key, '');
   assert.equal(C.mergeSettings({ provider: 'retired', profiles: { retired: { endpoint: 'https://old.example.com/api', key: 'old' } } }).profiles.team.key, '');
+});
+
+test('Sonnet 5.5 turns thinking off with between_tools and uses auto tool choice with a strict schema', () => {
+  const sonnet = C.chooseModel('team', p, 'claude-sonnet-5-5');
+  const body = JSON.parse(C.request(sonnet, items, 'English', {}, '').options.body);
+  assert.deepEqual(body.thinking, { type: 'between_tools' });
+  assert.deepEqual(body.tool_choice, { type: 'auto' });
+  assert.equal(body.tools[0].strict, true);
+  assert.match(body.system, /return_translations/);
+  const haiku = JSON.parse(C.request(p, items, 'English', {}, '').options.body);
+  assert.deepEqual(haiku.tool_choice, { type: 'tool', name: 'return_translations' }); assert.equal(haiku.tools[0].strict, undefined);
 });
