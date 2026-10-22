@@ -1,8 +1,8 @@
 {
-  "name": "figma-lens-reader",
+  "name": "lens-translate",
   "version": "0.1.0",
   "private": true,
-  "description": "A read-only bilingual reader for Figma Design and Dev Mode",
+  "description": "Read-only Figma plugin: select text and read its translation",
   "scripts": {
     "build": "node scripts/build.cjs",
     "test": "node --test tests/*.test.cjs",
