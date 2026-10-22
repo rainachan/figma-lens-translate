@@ -279,7 +279,7 @@ body.compact #notice.error{max-height:120px}
     return list.sort();
   }
   // Replaced with package.json's version by scripts/build.cjs.
-  const version = '0.1.2';
+  const version = '0.1.3';
   function newerVersion(latest, current) {
     const parse = v => (/^v?(\d+)\.(\d+)\.(\d+)$/.exec(String(v || '').trim()) || []).slice(1).map(Number);
     const a = parse(latest), b = parse(current);
