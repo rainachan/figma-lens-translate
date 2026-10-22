@@ -175,6 +175,9 @@ figma.ui.onmessage = async message => {
       if (!bounds || !bounds.width || !bounds.height) throw new Error('This region cannot be previewed.');
       const bytes = await node.exportAsync({ format: 'PNG', constraint: { type: 'SCALE', value: Math.min(2, 1600 / Math.max(bounds.width, bounds.height)) }, useAbsoluteBounds: true });
       if (snapshot && snapshot.version === current.version) send({ type: 'preview', version: current.version, bounds, bytes, background: previewBackground(node) });
+    } else if (message.type === 'open-releases') {
+      // Fixed destination: the UI cannot ask the host to open arbitrary URLs.
+      figma.openExternal('https://github.com/rainachan/figma-lens-translate/releases/latest');
     } else if (message.type === 'layout') {
       layoutMode = ['compact', 'reader', 'mirror', 'settings'].includes(message.mode) ? message.mode : 'compact';
       followSelection = message.follow !== false;

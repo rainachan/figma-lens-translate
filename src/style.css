@@ -12,3 +12,4 @@ body.compact header{height:36px;padding:0 12px}body.compact .brand{gap:7px}body.
 
 
 body.compact #notice.error{max-height:120px}
+#update{display:flex;align-items:center;gap:4px;padding:6px 20px;background:var(--soft);border-bottom:1px solid var(--line);font-size:11px}#update-text{flex:1}#update-download{color:var(--accent);font-weight:600}body.compact #update{padding:3px 12px;font-size:10px}body.compact #update .quiet{padding:3px 6px}

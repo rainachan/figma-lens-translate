@@ -24,6 +24,10 @@ You'll get an **API URL** and an **API key** from your team. Lens has no service
 
 Your key is stored only in Figma's plugin storage on this computer. It's never written into design files. **Haiku 5.5** is the default model. **Sonnet 5.5** handles nuanced wording better, but it's slower and costs more.
 
+## Updating
+
+When a new version is out, Lens shows **"Lens x.y.z is available · Download"** at the top of the panel. Download the new zip and unzip it **over the same folder** (replace the old files), then reopen the plugin. There's no need to import it again, and your key and settings stay.
+
 ## Everyday use
 
 - **Select to translate.** Click text, a component or a frame, and Lens translates all of its visible text. On a Mac, `⌘ + click` selects a text layer nested inside a component.
@@ -38,6 +42,7 @@ Your key is stored only in Figma's plugin storage on this computer. It's never w
 ## Good to know
 
 - Lens sends the selected text plus light context (page name, layer names) to your team's API. Frame previews never leave Figma.
+- Each time it opens, Lens asks GitHub for the latest version number. No design content, key or settings are sent.
 - Text that is already plain English, and text that is only numbers, times or symbols, is shown as-is and isn't sent to the model.
 - Each selection reads up to 160 text layers. For large boards, select one region at a time.
 - Lens can't read text inside images, text converted to outlines (vectors), or comments.
@@ -69,6 +74,10 @@ API 地址和 API key 由团队提供，插件本身不带任何服务地址或 
 
 Key 只保存在这台电脑的 Figma 插件存储里，不会写进设计文件。默认模型是 **Haiku 5.5**；**Sonnet 5.5** 措辞更好，但更慢、费用更高。
 
+### 更新
+
+有新版本时，面板顶部会显示 **「Lens x.y.z is available · Download」**。下载新的 zip，**解压覆盖到原来的文件夹**（替换旧文件），再重新打开插件即可。不用重新导入，Key 和设置都会保留。
+
 ### 日常使用
 
 - **点选即翻译**：点选文字、组件或画板，翻译其中所有可见的文字。macOS 上用 `⌘ + 点击` 可以直接选中组件里的文字图层。
@@ -83,6 +92,7 @@ Key 只保存在这台电脑的 Figma 插件存储里，不会写进设计文件
 ### 注意事项
 
 - 选中的文字和少量上下文（页面名、图层名）会发送到团队的 API。画板预览不会离开 Figma。
+- 每次打开时会向 GitHub 查询最新版本号，不发送任何设计内容、Key 或设置。
 - 本身已经是纯英文的文本，以及只有数字、时间或符号的文本，会直接显示原文，不发给模型。
 - 每次选区最多读取 160 个文字图层，大稿请分区域选。
 - 无法识别图片里的文字、转成轮廓（矢量）的文字和评论。
@@ -98,7 +108,10 @@ Requires Node.js 18+. There are no dependencies. · 需要 Node.js 18+，没有�
 npm run build    # bundle src/ into ui.html · 把 src/ 打包成 ui.html
 npm test         # unit tests · 单元测试
 npm run preview  # local UI harness with a simulated translator at http://127.0.0.1:49173 · 本地预览，使用模拟翻译
+npm run release -- 0.1.4 "What changed"  # bump, test, build, check, push, publish · 一键发版
 ```
+
+`npm run release` needs a clean working tree, the GitHub CLI (`gh`) and a local `.release-blocklist` file (one regex per line, not committed). It refuses to publish if any tracked file matches. · 发版需要工作区干净、已登录 `gh`，以及本地的 `.release-blocklist`（每行一个正则，不提交）；任何文件命中都会拒绝发布。
 
 `code.js` is the Figma-side entry point and only reads the document. The UI lives in `src/` (`ui.html`, `style.css`, `core.js`, `ui.js`). After editing those files, run `npm run build`.
 

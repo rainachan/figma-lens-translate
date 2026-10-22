@@ -229,7 +229,23 @@
     if (!list.length) throw new Error('No model list was returned. You can enter a model ID manually.');
     return list.sort();
   }
-  const api = { presets, modelChoices, chooseModel, defaults, mergeSettings, persistentSettings, restoreCredentials, isHostMessage, endpointURL, headers, request, extract, validate, batches, keepOriginal, inTarget, cacheKey, translate, models };
+  // Replaced with package.json's version by scripts/build.cjs.
+  const version = '__LENS_VERSION__';
+  function newerVersion(latest, current) {
+    const parse = v => (/^v?(\d+)\.(\d+)\.(\d+)$/.exec(String(v || '').trim()) || []).slice(1).map(Number);
+    const a = parse(latest), b = parse(current);
+    if (a.length !== 3 || b.length !== 3) return false;
+    for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i];
+    return false;
+  }
+  async function latestRelease(signal, fetcher = fetch) {
+    // Public GitHub metadata only: no key, design content or settings are sent.
+    const response = await fetcher('https://api.github.com/repos/rainachan/figma-lens-translate/releases/latest', { headers: { accept: 'application/vnd.github+json' }, credentials: 'omit', redirect: 'error', signal });
+    if (!response.ok) return null;
+    const tag = (await response.json()).tag_name;
+    return typeof tag === 'string' ? tag.replace(/^v/, '') : null;
+  }
+  const api = { version, newerVersion, latestRelease, presets, modelChoices, chooseModel, defaults, mergeSettings, persistentSettings, restoreCredentials, isHostMessage, endpointURL, headers, request, extract, validate, batches, keepOriginal, inTarget, cacheKey, translate, models };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LensCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

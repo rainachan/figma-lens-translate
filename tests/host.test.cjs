@@ -131,3 +131,9 @@ test('saving drops stored keys of removed providers', async () => {
   const saved = [...h.stored.values()][0];
   assert.equal(saved.profiles.go, undefined); assert.equal(saved.profiles.team.key, 'team-key');
 });
+
+test('the update link opens only the fixed releases page', async () => {
+  const h = setup(); const opened = []; h.figma.openExternal = url => opened.push(url);
+  await h.figma.ui.onmessage({ type: 'open-releases', url: 'https://evil.example' });
+  assert.deepEqual(opened, ['https://github.com/rainachan/figma-lens-translate/releases/latest']);
+});

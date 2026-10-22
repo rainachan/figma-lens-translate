@@ -13,6 +13,7 @@ body.compact header{height:36px;padding:0 12px}body.compact .brand{gap:7px}body.
 
 
 body.compact #notice.error{max-height:120px}
+#update{display:flex;align-items:center;gap:4px;padding:6px 20px;background:var(--soft);border-bottom:1px solid var(--line);font-size:11px}#update-text{flex:1}#update-download{color:var(--accent);font-weight:600}body.compact #update{padding:3px 12px;font-size:10px}body.compact #update .quiet{padding:3px 6px}
 </style></head>
 <body class="compact">
 <header><div class="brand"><span class="lens-mark" aria-hidden="true"></span><strong>Lens</strong></div><div class="header-actions"><button id="compact-toggle" class="quiet" title="Switch reader size">Expand</button><button id="settings-open" class="quiet">Settings</button></div></header>
@@ -21,6 +22,7 @@ body.compact #notice.error{max-height:120px}
   <div class="selection-bar"><div class="selection-name"><span class="eyebrow">SELECTED REGION</span><strong id="selection-title">Nothing selected</strong></div><button id="pin" class="quiet" aria-pressed="false" title="Keep this selection while browsing the canvas">Pin</button></div>
   <div class="reading-options"><label><input type="checkbox" id="auto" checked> Auto-translate</label><label><input type="checkbox" id="original" checked> Show original</label></div>
   <div id="notice" role="status" hidden><span id="notice-text"></span><div id="notice-actions" hidden><button id="retry" class="quiet">Retry</button><button id="notice-settings" class="quiet">Settings</button></div></div>
+  <div id="update" role="status" hidden><span id="update-text"></span><button id="update-download" class="quiet">Download</button><button id="update-dismiss" class="quiet" aria-label="Dismiss update notice">×</button></div>
   <div id="translation-progress" role="status" aria-live="polite" hidden><span class="spinner" aria-hidden="true"></span><div><strong id="progress-label">Translating…</strong><span id="progress-detail">Waiting for the model…</span></div></div>
   <div id="workspace"><section id="mirror-panel" hidden aria-label="Translation mirror"><div class="mirror-head"><span>Original preview</span><button id="preview-refresh" class="quiet">Refresh</button></div><div id="preview-stage"><p id="mirror-hint">Select a frame to preview.</p><div id="image-wrap" hidden><img id="preview-image" alt="Local preview of selected Figma region"><div id="hotspots"></div></div></div><div id="mirror-detail"><p>Hover over text to see its translation.</p></div></section>
   <main id="reading-list" aria-label="Translations"><div class="empty"><h1>Select text to translate</h1><p>You can also select a frame or component.</p><button id="empty-settings" class="primary">Set up</button></div></main></div>
@@ -276,7 +278,23 @@ body.compact #notice.error{max-height:120px}
     if (!list.length) throw new Error('No model list was returned. You can enter a model ID manually.');
     return list.sort();
   }
-  const api = { presets, modelChoices, chooseModel, defaults, mergeSettings, persistentSettings, restoreCredentials, isHostMessage, endpointURL, headers, request, extract, validate, batches, keepOriginal, inTarget, cacheKey, translate, models };
+  // Replaced with package.json's version by scripts/build.cjs.
+  const version = '0.1.2';
+  function newerVersion(latest, current) {
+    const parse = v => (/^v?(\d+)\.(\d+)\.(\d+)$/.exec(String(v || '').trim()) || []).slice(1).map(Number);
+    const a = parse(latest), b = parse(current);
+    if (a.length !== 3 || b.length !== 3) return false;
+    for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i];
+    return false;
+  }
+  async function latestRelease(signal, fetcher = fetch) {
+    // Public GitHub metadata only: no key, design content or settings are sent.
+    const response = await fetcher('https://api.github.com/repos/rainachan/figma-lens-translate/releases/latest', { headers: { accept: 'application/vnd.github+json' }, credentials: 'omit', redirect: 'error', signal });
+    if (!response.ok) return null;
+    const tag = (await response.json()).tag_name;
+    return typeof tag === 'string' ? tag.replace(/^v/, '') : null;
+  }
+  const api = { version, newerVersion, latestRelease, presets, modelChoices, chooseModel, defaults, mergeSettings, persistentSettings, restoreCredentials, isHostMessage, endpointURL, headers, request, extract, validate, batches, keepOriginal, inTarget, cacheKey, translate, models };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LensCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -574,7 +592,7 @@ $('preview-refresh').onclick = () => send({ type: 'refresh' });
 window.addEventListener('message', event => {
   if (!C.isHostMessage(event, window)) return;
   const m = event.data.pluginMessage;
-  if (m.type === 'settings') { S.settings = C.mergeSettings(m.settings); S.initialized = true; S.editor = m.editor; settingsChrome(); applyLayout(); if (!ready()) notice('Add your key in Settings to start reading.'); }
+  if (m.type === 'settings') { if (!S.initialized) checkForUpdate(); S.settings = C.mergeSettings(m.settings); S.initialized = true; S.editor = m.editor; settingsChrome(); applyLayout(); if (!ready()) notice('Add your key in Settings to start reading.'); }
   else if (m.type === 'settings-saved' && S.pendingSave && m.requestId === S.pendingSave.requestId) {
     clearTimeout(S.saveTimer); S.saveTimer = null; S.settings = S.pendingSave.settings; S.pendingSave = null; saving(false); closeSettings();
   } else if (m.type === 'stored-settings' && m.requestId === S.restoreRequest && !S.draft && !ready()) {
@@ -599,6 +617,19 @@ window.addEventListener('message', event => {
     else { notice(m.message, true); status('Action failed', 'error'); }
   }
 });
+async function checkForUpdate() {
+  if (!/^\d+\.\d+\.\d+$/.test(C.version) || typeof fetch !== 'function') return;
+  try {
+    const latest = await C.latestRelease(typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(5000) : undefined);
+    if (!latest || !C.newerVersion(latest, C.version) || S.settings.dismissedUpdate === latest) return;
+    $('update-text').textContent = 'Lens ' + latest + ' is available.';
+    $('update').dataset.version = latest; $('update').hidden = false;
+  } catch (_) {
+    // Offline or rate-limited: reading works the same without the notice.
+  }
+}
+$('update-download').onclick = () => send({ type: 'open-releases' });
+$('update-dismiss').onclick = () => { S.settings.dismissedUpdate = $('update').dataset.version; persist(); $('update').hidden = true; };
 function restoreOnFocus() { if (S.initialized && !S.draft && !ready()) send({ type: 'restore-credentials', requestId: ++S.restoreRequest }); }
 window.addEventListener('focus', restoreOnFocus);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) restoreOnFocus(); });

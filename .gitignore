@@ -4,3 +4,4 @@ dist/
 NOTES.zh.md
 dev/translation-quality-*
 dev/quality-dry-run.js
+.release-blocklist

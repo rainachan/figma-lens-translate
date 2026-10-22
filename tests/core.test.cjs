@@ -190,3 +190,14 @@ test('Sonnet 5.5 turns thinking off with between_tools and uses auto tool choice
   const haiku = JSON.parse(C.request(p, items, 'English', {}, '').options.body);
   assert.deepEqual(haiku.tool_choice, { type: 'tool', name: 'return_translations' }); assert.equal(haiku.tools[0].strict, undefined);
 });
+
+test('update check compares release versions and sends nothing but a public GitHub request', async () => {
+  assert.equal(C.newerVersion('0.1.10', '0.1.9'), true); assert.equal(C.newerVersion('v0.2.0', '0.1.9'), true);
+  assert.equal(C.newerVersion('0.1.2', '0.1.2'), false); assert.equal(C.newerVersion('0.1.1', '0.1.2'), false);
+  assert.equal(C.newerVersion('garbage', '0.1.2'), false); assert.equal(C.newerVersion('0.1.3', '__LENS_VERSION__'), false);
+  let seen;
+  assert.equal(await C.latestRelease(undefined, async (url, options) => { seen = { url, options }; return { ok: true, json: async () => ({ tag_name: 'v0.1.3' }) }; }), '0.1.3');
+  assert.equal(seen.url, 'https://api.github.com/repos/rainachan/figma-lens-translate/releases/latest');
+  assert.equal(seen.options.credentials, 'omit'); assert.equal(seen.options.body, undefined); assert.deepEqual(Object.keys(seen.options.headers), ['accept']);
+  assert.equal(await C.latestRelease(undefined, async () => ({ ok: false })), null);
+});

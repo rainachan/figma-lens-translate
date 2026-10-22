@@ -292,7 +292,7 @@ $('preview-refresh').onclick = () => send({ type: 'refresh' });
 window.addEventListener('message', event => {
   if (!C.isHostMessage(event, window)) return;
   const m = event.data.pluginMessage;
-  if (m.type === 'settings') { S.settings = C.mergeSettings(m.settings); S.initialized = true; S.editor = m.editor; settingsChrome(); applyLayout(); if (!ready()) notice('Add your key in Settings to start reading.'); }
+  if (m.type === 'settings') { if (!S.initialized) checkForUpdate(); S.settings = C.mergeSettings(m.settings); S.initialized = true; S.editor = m.editor; settingsChrome(); applyLayout(); if (!ready()) notice('Add your key in Settings to start reading.'); }
   else if (m.type === 'settings-saved' && S.pendingSave && m.requestId === S.pendingSave.requestId) {
     clearTimeout(S.saveTimer); S.saveTimer = null; S.settings = S.pendingSave.settings; S.pendingSave = null; saving(false); closeSettings();
   } else if (m.type === 'stored-settings' && m.requestId === S.restoreRequest && !S.draft && !ready()) {
@@ -317,6 +317,19 @@ window.addEventListener('message', event => {
     else { notice(m.message, true); status('Action failed', 'error'); }
   }
 });
+async function checkForUpdate() {
+  if (!/^\d+\.\d+\.\d+$/.test(C.version) || typeof fetch !== 'function') return;
+  try {
+    const latest = await C.latestRelease(typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(5000) : undefined);
+    if (!latest || !C.newerVersion(latest, C.version) || S.settings.dismissedUpdate === latest) return;
+    $('update-text').textContent = 'Lens ' + latest + ' is available.';
+    $('update').dataset.version = latest; $('update').hidden = false;
+  } catch (_) {
+    // Offline or rate-limited: reading works the same without the notice.
+  }
+}
+$('update-download').onclick = () => send({ type: 'open-releases' });
+$('update-dismiss').onclick = () => { S.settings.dismissedUpdate = $('update').dataset.version; persist(); $('update').hidden = true; };
 function restoreOnFocus() { if (S.initialized && !S.draft && !ready()) send({ type: 'restore-credentials', requestId: ++S.restoreRequest }); }
 window.addEventListener('focus', restoreOnFocus);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) restoreOnFocus(); });
