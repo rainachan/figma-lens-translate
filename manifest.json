@@ -1,0 +1,14 @@
+{
+  "name": "Lens · Bilingual Reader",
+  "id": "lens-bilingual-reader-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma", "dev"],
+  "capabilities": ["inspect"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "Users supply their own translation API endpoint and key. Only selected text and its context are sent to that endpoint. Frame previews stay inside Figma."
+  }
+}

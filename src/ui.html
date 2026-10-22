@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lens · Bilingual Reader</title><style>/* STYLE */</style></head>
+<body class="compact">
+<header><div class="brand"><span class="lens-mark" aria-hidden="true"></span><strong>Lens</strong></div><div class="header-actions"><button id="compact-toggle" class="quiet" title="Switch reader size">Expand</button><button id="settings-open" class="quiet">Settings</button></div></header>
+<section id="reader">
+  <div class="toolbar"><label class="language">Read in <select id="language"><option>English</option><option>简体中文</option></select></label><button id="follow-toggle" class="quiet" aria-pressed="true" title="Place the floating window beside the selected region. Turn off to keep its position.">Follow</button><button id="mirror-toggle" class="quiet" aria-pressed="false">Mirror</button></div>
+  <div class="selection-bar"><div class="selection-name"><span class="eyebrow">SELECTED REGION</span><strong id="selection-title">Nothing selected</strong></div><button id="pin" class="quiet" aria-pressed="false" title="Keep this selection while browsing the canvas">Pin</button></div>
+  <div class="reading-options"><label><input type="checkbox" id="auto" checked> Auto-translate</label><label><input type="checkbox" id="original" checked> Show original</label></div>
+  <div id="notice" role="status" hidden><span id="notice-text"></span><div id="notice-actions" hidden><button id="retry" class="quiet">Retry</button><button id="notice-settings" class="quiet">Settings</button></div></div>
+  <div id="translation-progress" role="status" aria-live="polite" hidden><span class="spinner" aria-hidden="true"></span><div><strong id="progress-label">Translating…</strong><span id="progress-detail">Waiting for the model…</span></div></div>
+  <div id="workspace"><section id="mirror-panel" hidden aria-label="Translation mirror"><div class="mirror-head"><span>Original preview</span><button id="preview-refresh" class="quiet">Refresh</button></div><div id="preview-stage"><p id="mirror-hint">Select a frame to preview.</p><div id="image-wrap" hidden><img id="preview-image" alt="Local preview of selected Figma region"><div id="hotspots"></div></div></div><div id="mirror-detail"><p>Hover over text to see its translation.</p></div></section>
+  <main id="reading-list" aria-label="Translations"><div class="empty"><h1>Select text to translate</h1><p>You can also select a frame or component.</p><button id="empty-settings" class="primary">Set up</button></div></main></div>
+  <footer><div><span id="status-dot" class="status-dot"></span><span id="status">Ready to connect</span></div><div class="footer-actions"><button id="copy-all" class="quiet" title="Copy all translated text" disabled>Copy</button><button id="cancel" class="quiet" hidden>Stop</button><button id="translate" class="primary small" disabled>Translate</button></div></footer>
+  <div class="provider-line"><span id="provider-label">Not connected</span><span>Read-only</span></div>
+</section>
+<section id="settings" hidden>
+  <div class="settings-heading"><h1>Settings</h1><button id="settings-close" class="quiet">Back</button></div>
+  <form id="settings-form">
+    <label>Provider<select id="provider"><option value="team">Team API</option><option value="custom">Custom / local API</option></select></label>
+    <label>API base URL<input id="endpoint" type="url" autocomplete="off" spellcheck="false" placeholder="https://your-team-api.example.com/api" required></label>
+    <label>Model<select id="model"></select></label>
+    <label id="custom-model-row" hidden>Model ID<input id="custom-model" autocomplete="off" spellcheck="false" placeholder="Enter a model ID"></label>
+    <label id="key-row">API key<div class="key-field"><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key"><button id="key-toggle" type="button" class="quiet">Show</button></div><span class="key-hint">Your key is remembered on this device.</span></label>
+    <details id="advanced-settings">
+      <summary>Advanced</summary>
+      <div class="two-col"><label>API format<select id="protocol"><option value="anthropic">Anthropic Messages</option><option value="chat">OpenAI-compatible Chat</option><option value="responses">Responses API</option></select></label><label>Authentication<select id="auth"><option value="x-api-key">x-api-key</option><option value="bearer">Bearer token</option><option value="custom">Custom header</option><option value="none">No key (local)</option></select></label></div>
+      <label id="header-row" hidden>Header name<input id="auth-header" autocomplete="off" spellcheck="false" placeholder="x-api-key"></label>
+      <label>Terminology <span class="optional">optional</span><textarea id="glossary" rows="3" maxlength="6000" placeholder="布防 = Arm&#10;撤防 = Disarm"></textarea></label>
+    </details>
+    <div id="connection-result" role="status" hidden></div>
+    <div class="settings-actions"><button id="test" type="button" class="secondary" title="Translate a sample sentence">Test</button><button id="save-settings" type="submit" class="primary">Save</button></div>
+  </form>
+</section>
+<script>/* CORE */</script><script>/* APP */</script>
+</body></html>
